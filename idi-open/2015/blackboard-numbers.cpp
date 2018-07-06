@@ -8,11 +8,11 @@
 
 using namespace std;
 
-const int32_t LIMIT      = 1048576; // sqrt(1099511627775) = 1048575.9
-const int32_t LIMIT_SQRT = 1024;    // sqrt(1048576) = 1024
+const int32_t LIMIT      = 1'048'576; // sqrt(1'099'511'627'775) = 1048575.9
+const int32_t LIMIT_SQRT = 1'024;     // sqrt(1'048'576) = 1'024
 
 int numbers[LIMIT + 1];
-int primes[90767];                  // pi(1048576) = 90766.52
+int primes[90'767];                   // pi(1'048'576) = 90'766.52
 int n;
 
 void sieve()
