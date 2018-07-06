@@ -1,0 +1,14 @@
+# Test directory for each contest
+tests
+
+# Text files containing hints for solutions
+hints
+
+# TODO files
+todo
+
+# Folder containing source files of solutions sketches
+explainations
+
+# Stupid VS Code Folder
+.vscode

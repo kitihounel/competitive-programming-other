@@ -1,3 +1,13 @@
+/**
+ * This problem simply asks to compute the cost of a minimum spanning of a graph.
+ * Build a graph which vertices are the cats. There is a edge between each pair of cats.
+ * The cost of an edge is the distance between the two cats that the edge connects.
+ * We have:
+ *  - T, the cost of a minimum spanning spanning tree.
+ *  - C, the number of cats.
+ *  - M, milk amount.
+ * We can feed all the cats iff T + C <= M.
+ */
 #include <iostream>
 #include <algorithm>
 #include <vector>

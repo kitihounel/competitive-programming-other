@@ -1,23 +1,25 @@
+/**
+ * In the problem statement, it is said that the numbers will have up to
+ * 10 digits, so we can have the number L = 0xFFFFFFFFFF = 1'099'511'627'775.
+ * We will need all prime numbers less or equal to sqrt(L).
+ */
 #include <iostream>
-#include <iomanip>
 #include <string>
 #include <algorithm>
-#include <sstream>
-#include <cstdint>
-#include <bitset>
 
 using namespace std;
+using i64 = long long int;
 
-const int32_t LIMIT      = 1'048'576; // sqrt(1'099'511'627'775) = 1048575.9
-const int32_t LIMIT_SQRT = 1'024;     // sqrt(1'048'576) = 1'024
+const int LIMIT      = 1'048'576; // sqrt(1'099'511'627'775) = 1048575.9
+const int LIMIT_SQRT = 1'024;     // sqrt(1'048'576) = 1'024
 
 int numbers[LIMIT + 1];
-int primes[90'767];                   // pi(1'048'576) = 90'766.52
+i64 primes[90'767];               // pi(1'048'576) = 90'766.52
 int n;
 
 void sieve()
 {
-    for (int i = 2; i <= LIMIT_SQRT; ++i) {
+    for (int i = 3; i <= LIMIT_SQRT; i += 2) {
         if (numbers[i] == -1) {
             continue;
         }
@@ -26,27 +28,27 @@ void sieve()
         }
     }
 
-    for (i = 2; i < LIMIT; ++i) {
+    primes[0] = 2;
+    n = 1;
+    for (int i = 3; i < LIMIT; i += 2) {
         if (numbers[i] == 0) {
-            primes[n++] = i;
+            primes[n++] = static_cast<i64>(i);
         }
     }
 }
 
-inline bool isPrime(int64_t p)
+inline bool isPrime(const i64 &p)
 {
-    int i;
+    int  i;
     bool b;
 
-    if (p == 0 || p == 1) {
+    if (p <=  1ll) {
         b = false;
     } else {
-        if (p == 2 || p == 3) {
-            b = true;
-        } else {
-            b = true;
-            while ( (primes[i] * primes[i] <= p) && b && (i < n) )
-                b = (p % primes[i++] != 0);
+        b = true;
+        while ( (primes[i] * primes[i] <= p) && b && (i < n) ) {
+            b = (p % primes[i] != 0);
+            ++i;
         }
     }
 
@@ -55,119 +57,68 @@ inline bool isPrime(int64_t p)
 
 inline bool isHexPrime(const string &s)
 {
-    istringstream iss;
-    int64_t x;
-
-    iss.str(s);
-    iss >> setbase(16);
-    iss >> x;
-
-    return isPrime(x);
+    return isPrime(strtoll(s.c_str(), nullptr, 16));
 }
 
 inline bool isDecPrime(const string &s)
 {
-    istringstream iss;
-    int64_t x;
-
-    iss.str(s);
-    iss >> x;
-
-    return isPrime(x);
+    return isPrime(strtoll(s.c_str(), nullptr, 10));
 }
 
 inline bool isOctPrime(const string &s)
 {
-    istringstream iss;
-    int64_t x;
-
-    iss.str(s);
-    iss >> setbase(8);
-    iss >> x;
-
-    return isPrime(x);
+    return isPrime(strtoll(s.c_str(), nullptr, 8));
 }
 
 inline bool isBinPrime(const string &s)
 {
-    bitset<40> bs(s);
+    return isPrime(strtoll(s.c_str(), nullptr, 2));
+}
 
-    return isPrime(bs.to_ullong());
+int gcd(int a, int b)
+{
+    int r;
+
+    while (b != 0) {
+        r = a % b;
+        a = b;
+        b = r;
+    }
+
+    return a;
 }
 
 int main()
 {
-    int    t, num, denom;
-    bool   hexChar, decChar, octChar, binChar;
+    int    t, num, denom, g;
+    bool   decNumber, octNumber, binNumber;
     string s;
 
     sieve();
     cin >> t;
-    cin.ignore();
     while(t > 0) {
-        getline(cin, s);
+        cin >> s;
+        decNumber = all_of(s.begin(), s.end(), [](const char &ch) -> bool {
+            return ch >= '0' && ch <= '9';
+        });
+        octNumber = all_of(s.begin(), s.end(), [](const char &ch) -> bool {
+            return ch >= '0' && ch <= '7';
+        });
+        binNumber = all_of(s.begin(), s.end(), [](const char &ch) -> bool {
+            return ch == '0' || ch <= '1';
+        });
 
-        num = denom = 0;
-        hexChar = decChar = octChar = binChar = false;
-        for(const char &c : s) {
-            if (!hexChar)
-                hexChar = (c >= 'A') && (c <= 'F');
-            if (!decChar)
-                decChar = (c == '8') || (c == '9');
-            if (!octChar)
-                octChar = (c >= '2') && (c <= '7');
-        }
-        binChar = !hexChar && !decChar && !octChar == false;
+        num = (int) isHexPrime(s)
+                + (int) (decNumber && isDecPrime(s))
+                + (int) (octNumber && isOctPrime(s))
+                + (int) (binNumber && isBinPrime(s));
+        denom = 1 + (int) decNumber + (int) octNumber + (int) binNumber;
+        g = gcd(num, denom);
 
-        // The number is always in hexadecimal
-        if (isHexPrime(s)) {
-             num++;
-        }
-
-        if (hexChar) {
-            decChar = octChar = binChar = false;
-            denom = 1;
-        }
-
-        if (decChar) {
-            octChar = binChar = false;
-            denom = 2;
-            if (isDecPrime(s))
-                num++;
-        }
-
-        if (octChar) {
-            binChar = false;
-            denom = 3;
-            if (isDecPrime(s)) num++;
-            if (isOctPrime(s)) num++;
-        }
-
-        if (binChar) {
-            denom = 4;
-            if (isDecPrime(s)) num++;
-            if (isOctPrime(s)) num++;
-            if (isBinPrime(s)) num++;
-        }
-
-        // Fraction reduction
-        if (denom == num) {
-            denom = num = 1;
-        } else {
-            if (denom == 4 && num == 2) {
-                denom = 2;
-                num = 1;
-            } else {
-                if(num == 0) {
-                    denom = 1;
-                }
-            }
-        }
-
-        // Result output.
-        cout << num << "/" << denom << endl;
+        cout << (num / g) << "/" << (denom / g) << endl;
         t--;
     }
 
     return 0;
 }
+
