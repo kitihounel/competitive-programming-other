@@ -12,3 +12,6 @@ explainations
 
 # Stupid VS Code Folder
 .vscode
+
+# WSL Zone Identifier files
+*Zone.Identifier
